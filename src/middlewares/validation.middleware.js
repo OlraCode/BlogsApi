@@ -1,5 +1,5 @@
-const validate = (schema) => (req, res, next) => {
-        const result = schema.safeParse(req.body);
+const validate = (schema) => async (req, res, next) => {
+        const result = await schema.safeParseAsync(req.body);
 
         if (!result.success) {
             const errors = result.error.issues;
