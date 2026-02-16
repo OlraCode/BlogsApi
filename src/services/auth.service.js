@@ -27,25 +27,35 @@ const generateTokens = async (user) => {
     return {accessToken, refreshToken};
 }
 
-const revokeToken = async (token) => {
+const revokeToken = async (token, newRefreshToken = null) => {
     const hashToken = crypto.createHash('sha256').update(token).digest('hex');
-    const revokedToken = await RefreshTokenModel.findOneAndUpdate({hashToken, revoked: false}, {revoked: true});
 
+    if (newRefreshToken) {
+        console.log(newRefreshToken);
+        const newHashToken = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
+        const newToken = await RefreshTokenModel.findOne({hashToken: newHashToken});
+        console.log(newToken._id);
+        const revokedToken = await RefreshTokenModel.findOneAndUpdate({hashToken, revoked: false}, {revoked: true, replacedBy: newToken._id});
+        console.log(revokedToken);
+        return revokedToken;
+    }
+
+    const revokedToken = await RefreshTokenModel.findOneAndUpdate({hashToken, revoked: false}, {revoked: true});
     return revokedToken;
 };
 
 const refresh = async (token) => {
     const hashToken = crypto.createHash('sha256').update(token).digest('hex');
-    const refreshToken = await RefreshTokenModel.findOne({hashToken}).populate('user');
+    const userRefreshToken = await RefreshTokenModel.findOne({hashToken}).populate('user');
 
-    if (!refreshToken || refreshToken.expiresAt < new Date() || refreshToken.revoked) {
+    if (!userRefreshToken || userRefreshToken.expiresAt < new Date() || userRefreshToken.revoked) {
         return null;
     }
 
-    const newTokens = await generateTokens(refreshToken.user);
-    revokeToken(token);
+    const {accessToken, refreshToken} = await generateTokens(userRefreshToken.user);
+    revokeToken(token, refreshToken);
 
-    return newTokens;
+    return {accessToken, refreshToken};
 };
 
 module.exports = {generateTokens, revokeToken, refresh};

@@ -20,7 +20,9 @@ const RefreshTokenSchema = mongoose.Schema({
             default: false
         },
         replacedBy: {
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'RefreshToken',
+            default: null
         }
     },
     {
