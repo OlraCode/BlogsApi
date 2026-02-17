@@ -1,4 +1,5 @@
 const Blog = require('../models/blog.model');
+const {generateUniqueSlug} = require('../services/blog.service');
 
 const index = async (req, res) => {
     try {
@@ -17,7 +18,8 @@ const index = async (req, res) => {
 
 const show = async (req, res) => {
     try {
-        const blog = await Blog.findById(req.params.id);
+        const slug = req.params;
+        const blog = await Blog.findOne(slug);
 
         if (!blog) {
             return res.status(404).json({message: "Blog not found"});
@@ -32,7 +34,11 @@ const show = async (req, res) => {
 
 const create = async (req, res) => {
     try {
-        const newBlog = await Blog.create(req.body);
+        const slug = await generateUniqueSlug(req.body.title);
+        const {title, content} = req.body;
+
+        const newBlog = await Blog.create({title, slug, content});
+        
         return res.status(201).json(newBlog);
 
     } catch (e) {

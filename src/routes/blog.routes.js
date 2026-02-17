@@ -6,7 +6,7 @@ const validate = require('../middlewares/validation.middleware');
 const {createBlogSchema, updateBlogSchema} = require('../validations/blog.validation');
 
 router.get('/', index);
-router.get('/:id', show);
+router.get('/:slug', show);
 router.post('/', validate(createBlogSchema), create);
 router.put('/:id', validate(updateBlogSchema), update);
 router.delete('/:id', remove);

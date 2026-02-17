@@ -8,6 +8,7 @@ const connectDB = async () => {
         console.log("Database connection failed: ", e.message);
         setTimeout(connectDB, 5000);
     });
+    mongoose.set('autoIndex', true);
 };
 
 module.exports = connectDB;
