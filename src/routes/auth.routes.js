@@ -10,6 +10,6 @@ router.post('/login', login);
 router.post('/register', validate(createUserSchema), register);
 router.post('/logout', logout);
 router.post('/refresh', refresh);
-router.get('/me', auth(), me);
+router.get('/me', auth(['user', 'moderator', 'admin']), me);
 
 module.exports = router;
